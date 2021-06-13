@@ -1,4 +1,4 @@
-import User from '../../models/Auth/authModel'
+const User = require('../../models/Auth/authModel')
 
 exports.signup = async (req, res) => {
 
