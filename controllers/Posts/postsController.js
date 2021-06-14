@@ -6,6 +6,22 @@ exports.getPosts = async (req, res) => {
     res.status(200).json(posts);
 }
 
+exports.getPost = async (req, res) => { 
+    const { id } = req.params;
+
+    try {
+        const post = await PostMessage.findById(id);
+        
+        res.status(200).json(post);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}
+
+exports.getPostBySearch = async (req, res) => {
+
+}
+
 exports.createPost = async (req, res) => {
     const { description, selectedFile, creator, name } = req.body;
 
@@ -19,7 +35,7 @@ exports.createPost = async (req, res) => {
     }
 }
 
-export const updatePost = async (req, res) => {
+exports.updatePost = async (req, res) => {
     const { id } = req.params;
     const { title, message, creator, selectedFile, tags } = req.body;
     
