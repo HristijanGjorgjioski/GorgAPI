@@ -49,22 +49,73 @@ exports.signup = async (req, res) => {
   }
 };
 
-exports.resetPassword = async (req, res, next) => {
-  crypto.randomBytes(32, async (err, buffer) => {
-    if (err) {
-      console.log(err);
-      return res.redirect('/reset');
+exports.requestPasswordReset = async (req, res, next) => {
+  try {
+    crypto.randomBytes(32, async (err, buffer) => {
+      if (err) {
+        console.log(err);
+        res.status(500).json({ message: "Something went wrong" });
+      }
+      const token = buffer.toString('hex');
+      
+      const user = await User.findOne({ email: req.body.email });
+  
+      if(!user) return res.status(500).json({ message: "Something went wrong" });
+  
+      user.resetToken = await token;
+      user.resetTokenExpiration = await Date.now() + 3600000;
+      await user.save();
+  
+      await res.status(200);
+
+      sendgrid.setApiKey('API_KEY_HERE');
+      await sendgrid.send({
+        from: 'hristijangorgioski501@gmail.com',
+        to: req.body.email,
+        subject: 'Password reset',
+        html: `
+          <h2>You requested a password reset. Click <a href="http://localhost:3000/new-password/${token}">HERE</a></h2>
+          <h2>and change your password. We hope you enjoy our app!</h2>
+        `
+      });
+    }) 
+  } catch (error) {
+    res.redirect('/reset');
+    console.log(error);
+  }
+}
+
+exports.newPassword = async (req, res) => {
+  const token = req.params.token;
+  const newPassword = req.body.password;
+  const userId = req.body.userId;
+  const passwordToken = req.body.passwordToken;
+  let resetUser;
+  let hashedPassword;
+
+  try {
+    const user = await User.findOne({
+      resetToken: passwordToken,
+      resetTokenExpiration: { $gt: Date.now() },
+      _id: userId
+    });
+  
+    resetUser = user;
+  
+    if(user) {
+      hashedPassword = bcrypt.hash(newPassword, 12);
+      return hashedPassword;
     }
-    const token = buffer.toString('hex');
-    
-    const user = await User.findOne({ email: req.body.email });
-
-    if(!user) return res.redirect('/reset-password');
-
-    user.resetToken = await token;
-    user.resetTokenExpiration = await Date.now() + 3600000;
-    await user.save();
-
-    res.redirect('/')
-  })
+  
+    if(hashedPassword) {
+      resetUser.password = hashedPassword;
+      resetUser.resetToken = undefined;
+      resetUser.resetTokenExpiration = undefined;
+      return resetUser.save();
+    }
+  
+    return res.status(200).json({ message: "Success!" });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong", token }) 
+  }
 }
