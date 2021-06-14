@@ -18,7 +18,7 @@ exports.getPost = async (req, res) => {
     }
 }
 
-exports.getPostBySearch = async (req, res) => {
+exports.getPostsBySearch = async (req, res) => {
     const { searchQuery, tags } = req.query;
 
     try {
