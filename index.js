@@ -5,8 +5,10 @@ const mongoose = require('mongoose')
 const app = express()
 
 const authRoutes = require('./routes/Auth/authRouter')
+const postsRoutes = require('./routes/Posts/postsRouter')
 
 app.use(authRoutes)
+app.use(postsRoutes)
 
 app.use(bodyParser.json({ limit: '30mb', extended: true }))
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }))
