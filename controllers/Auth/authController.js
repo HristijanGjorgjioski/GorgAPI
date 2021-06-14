@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require('crypto');
+const { validationResult } = require('express-validator');
 
 const User = require("../../models/Auth/authModel");
 
@@ -46,3 +48,23 @@ exports.signup = async (req, res) => {
     console.log(error);
   }
 };
+
+exports.resetPassword = async (req, res, next) => {
+  crypto.randomBytes(32, async (err, buffer) => {
+    if (err) {
+      console.log(err);
+      return res.redirect('/reset');
+    }
+    const token = buffer.toString('hex');
+    
+    const user = await User.findOne({ email: req.body.email });
+
+    if(!user) return res.redirect('/reset-password');
+
+    user.resetToken = await token;
+    user.resetTokenExpiration = await Date.now() + 3600000;
+    await user.save();
+
+    res.redirect('/')
+  })
+}
