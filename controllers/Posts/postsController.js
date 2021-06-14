@@ -67,3 +67,14 @@ exports.deletePost = async (req, res) => {
 
     res.json({ message: "Post deleted successfully." });
 }
+
+exports.likePost = async (req, res) => {
+    const { id } = req.params;
+
+    if (!req.userId) {
+        return res.json({ message: "Unauthenticated" });
+      }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
+    
+}
