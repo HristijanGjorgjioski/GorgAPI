@@ -7,7 +7,9 @@
   - signout
   - passwordReset
   - emailReset
-  
+
+###########################
+
 * Post:
   - getPosts
   - getPost
@@ -17,7 +19,9 @@
   - deletePost
   - likePost
 
-Tech stack for this project:
+###########################
+
+* Tech stack:
   - Node.js
   - Express
   - MongoDB
